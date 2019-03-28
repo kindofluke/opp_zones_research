@@ -1,0 +1,21 @@
+version: '3'
+services:
+  notebook:
+    image: kindofluke/python-jupyter-lab-docker  
+    command: sh -c "pip install -r /code/requirements.txt; jupyter notebook --ip=0.0.0.0 --no-browser --notebook-dir=/code  --NotebookApp.token='' --allow-root"
+    ports:
+    - "8888:8888"
+    volumes:
+    - .:/code
+    environment:
+        - PGPASSWORD
+  # r-notebook:
+  #   image: jupyter/datascience-notebook  
+  #   ports:
+  #   - "8889:8888"
+  #   volumes:
+  #   - .:/home/jovyan/work
+  #   environment:
+  #       - PGPASSWORD
+  #       - JUPYTER_ENABLE_LAB=yes
+ 
