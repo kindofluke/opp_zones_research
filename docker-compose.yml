@@ -9,6 +9,12 @@ services:
     - .:/code
     environment:
         - PGPASSWORD
+  db:
+    image: mdillon/postgis:9.5
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${PGPASSWORD}
   # r-notebook:
   #   image: jupyter/datascience-notebook  
   #   ports:
