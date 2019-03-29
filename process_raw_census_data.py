@@ -86,7 +86,8 @@ income for such tract does not exceed 80 percent of statewide median family inco
     tract_frame['qual_as_opp_zone'] = tract_frame.apply(tract_is_opp_zone, axis=1)
     return tract_frame
 
-
+def fix_geoid(geoid2):
+    return ''.join(['1400000US', str(geoid2)])
 #%%
 def get_tract_areas():
     """
@@ -94,9 +95,6 @@ def get_tract_areas():
     """
     tract_geojson_files = Path('data','census_tract_shapes').glob("*.json")
     tract_sizes = {}
-    def fix_geoid(geoid2):
-        return ''.join(['1400000US', str(geoid2)])
-    
     for geojson_file in tract_geojson_files:
         print(f"Getting Features for {geojson_file}")
         state_features = gpd.read_file(geojson_file)
