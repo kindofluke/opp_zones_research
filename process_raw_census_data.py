@@ -24,6 +24,14 @@ def statewide_median_incomes():
     state_frame = state_frame[state_frame.index.str.startswith("0400000US")]
     return state_frame[['population_16_and_over','median_income','pct_unemployment','pct_poverty']] #return only the actual states
 
+
+def fix_median_income(val):
+    if val == '250,000+':
+        return 250000
+    elif val == '2,500-':
+        return 2500
+    else:
+        return float(val)
 #%%
 def isCensusTractQualified():
     """
@@ -64,13 +72,6 @@ income for such tract does not exceed 80 percent of statewide median family inco
         1400000US01001020100
         """
         return ''.join(('0',geoid[1:11]))
-    def fix_median_income(val):
-        if val == '250,000+':
-            return 250000
-        elif val == '2,500-':
-            return 2500
-        else:
-            return float(val)
     tract_frame['state_geoid'] = tract_frame.geoid.apply(get_state_geoid)
     tract_frame['poverty_above_20pct'] = tract_frame.pct_poverty.astype(float) > 20
     tract_frame = tract_frame.join(state_frame, on='state_geoid', rsuffix='_state')
@@ -88,18 +89,5 @@ income for such tract does not exceed 80 percent of statewide median family inco
 
 def fix_geoid(geoid2):
     return ''.join(['1400000US', str(geoid2)])
-#%%
-def get_tract_areas():
-    """
-    Function returns  series dictionary of all census tracts and their land area by geoid
-    """
-    tract_geojson_files = Path('data','census_tract_shapes').glob("*.json")
-    tract_sizes = {}
-    for geojson_file in tract_geojson_files:
-        print(f"Getting Features for {geojson_file}")
-        state_features = gpd.read_file(geojson_file)
-        for feature in state_features.itertuples():
-            tract_sizes[fix_geoid(feature.GEOID)] = {'ALAND':feature.ALAND, 'AWATER':feature.AWATER}
-    with open(Path('data','census_tract_shapes','summary_file.json'), 'w') as jsonfile:
-        json.dump(tract_sizes, jsonfile)
+
 

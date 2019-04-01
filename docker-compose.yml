@@ -8,13 +8,15 @@ services:
     volumes:
     - .:/code
     environment:
-        - PGPASSWORD
+      POSTGRES_PASSWORD: ${PGPASSWORD}
   db:
     image: mdillon/postgis:9.5
     ports:
     - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ${PGPASSWORD}
+    volumes:
+    - .:/code
   # r-notebook:
   #   image: jupyter/datascience-notebook  
   #   ports:
