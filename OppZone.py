@@ -32,6 +32,7 @@ def check_files():
 def load_db():
     """Loads the Docker Datbase
     """
+    check_files()
     click.echo(click.style("Loading the Datbase this takes 10 Min", fg='blue'))
     postgis_load.load_all()
     click.echo(click.style("LOADED", fg='green'))

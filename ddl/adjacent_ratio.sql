@@ -1,3 +1,4 @@
+drop table if exists adjacent_analysis;
 create table adjacent_analysis as 
 with qual_tracts as (
     SELECT 
@@ -23,4 +24,4 @@ join tract_data td on gt.geoid = td.geoid2
 group by qt.tract_geoid,
 state,
 county_name,
-designation
+designation;
