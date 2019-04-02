@@ -146,3 +146,4 @@ def load_all():
     bulk_insert_mappings_tractdata()
     bulk_insert_mappings_qualified_zone_data()
 
+load_all()

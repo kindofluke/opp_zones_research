@@ -3,6 +3,7 @@ from pathlib import Path
 import tempfile
 import geopandas as gpd
 import zipfile
+from shapely.geometry import Polygon
 
 crs = {'init' :'epsg:4326'}
 
@@ -30,16 +31,17 @@ def extract_shape_files():
         shape_files = Path(temp_directory).glob('*.shp')
         for shape in shape_files:
             print(f"Creating GeoJSON for {shape}")
-            geo_json_contents = gpd.read_file(shape).to_crs(crs).to_json()
-            with open(Path(Path.cwd(),'data','census_tract_shapes',shape.stem + '.json'), 'w') as geojson_file:
-                geojson_file.write(geo_json_contents)
-        
+            geojson_path = Path(Path.cwd(),'data','census_tract_shapes',shape.stem + '.json')
+            frame = gpd.read_file(shape).to_crs(crs)
+            frame[frame.geometry.apply(type) == Polygon].to_file(geojson_path, driver='GeoJSON')
+                # geojson_file.write(geo_json_contents)
 
 
 ftp = ftp_login()
 filenames = get_filenames()
+filter_files = [f for f in filenames if '02' in f]
 with tempfile.TemporaryDirectory() as temp_directory:
-    for ftp_file in filenames:
+    for ftp_file in filter_files:
         download_file(ftp_file)
     ftp.quit()
     extract_shape_files()
