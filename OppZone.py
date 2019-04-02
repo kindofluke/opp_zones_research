@@ -56,7 +56,7 @@ def check_shape_files():
         raise FileNotFoundError("Shape files not found")
 
 def check_acs_state_files():
-    state_file_path = Path('data','states','ACS_17_5yr_DP03_with_ann.csv')
+    state_file_path = Path('data','states','ACS_15_5YR_DP03_with_ann.csv')
     if not state_file_path.exists():
         error_message = """
         Please visit https://factfinder.census.gov/
@@ -67,7 +67,7 @@ def check_acs_state_files():
         return True
 
 def check_acs_tract_files():
-    state_file_path = Path('data','states','ACS_17_5yr_DP03_with_ann.csv')
+    state_file_path = Path('data','tracts','ACS_15_5YR_DP03_with_ann.csv')
     if not state_file_path.exists():
         error_message = """
         Please visit https://factfinder.census.gov/
