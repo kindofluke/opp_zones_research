@@ -35,8 +35,19 @@ class TractData(Base):
     state_geoid = Column(String)
     poverty_above_20pct = Column(Boolean)
     ratio_state_median_income = Column(Float)
-    median_income_less_than_80pct = Column(Boolean)
+    ratio_msa_median_income = Column(Float, nullable=True)
+    state_median_income_less_than_80pct = Column(Boolean)
+    msa_median_income_less_than_80pct = Column(Boolean, nullable=True)
     qual_as_opp_zone = Column(Boolean)
+    msa_median_income = Column(Float, nullable=True)
+    median_income_state = Column(Float, nullable=True)
+
+class IdentifedTracts(Base):
+    __tablename__ = 'identified_tracts'
+    id = Column(Integer, primary_key=True)
+    geoid2 = Column(String)
+    state = Column(String)
+
 
 class QualifiedOppZones(Base):
     __tablename__ = 'qual_opp_zones'
@@ -92,7 +103,7 @@ def bulk_insert_mappings_geo():
 
 def bulk_insert_mappings_tractdata():
     all_tracts = prcd.isCensusTractQualified()
-    all_tracts = all_tracts.dropna() #no null values 
+    all_tracts = all_tracts.dropna(subset=['pct_poverty','pct_unemployment','median_income'])#no null values 
     session = Session(bind=engine)
     session.bulk_insert_mappings(
         TractData,
@@ -105,8 +116,12 @@ def bulk_insert_mappings_tractdata():
                 pct_poverty=tract.pct_poverty,
                 state_geoid = tract.state_geoid,
                 poverty_above_20pct = tract.poverty_above_20pct,
+                median_income_state = tract.median_income_state,
+                msa_median_income = tract.msa_median_income,
                 ratio_state_median_income = tract.ratio_state_median_income,
-                median_income_less_than_80pct = tract.median_income_less_than_80pct,
+                ratio_msa_median_income=tract.ratio_msa_median_income,
+                state_median_income_less_than_80pct = tract.state_median_income_less_than_80pct,
+                msa_median_income_less_than_80pct = tract.msa_median_income_less_than_80pct,
                 qual_as_opp_zone = tract.qual_as_opp_zone
 
 
@@ -140,10 +155,32 @@ def bulk_insert_mappings_qualified_zone_data():
     )
     session.commit()
 
+def bulk_insert_mappings_identified_tracts():
+    path_to_file = Path('data','IdentifiedPossibleOppZones.csv')
+    all_tracts = pd.read_csv(path_to_file)
+    all_tracts = all_tracts.dropna() #no null values 
+    session = Session(bind=engine)
+    session.bulk_insert_mappings(
+        IdentifedTracts,
+        [
+            dict(
+         
+                state = tract.State,
+                geoid2 = tract.GEOID2
+
+            )
+            for tract in all_tracts.itertuples()
+        ]
+    )
+    session.commit()
+
 def load_all():
     init_db()
     bulk_insert_mappings_geo()
     bulk_insert_mappings_tractdata()
     bulk_insert_mappings_qualified_zone_data()
+    bulk_insert_mappings_identified_tracts()
 
-load_all()
+init_db()
+bulk_insert_mappings_tractdata()
+

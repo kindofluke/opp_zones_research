@@ -13,7 +13,7 @@ def statewide_median_incomes():
     """
     column_names = {
         'HC01_VC03':'population_16_and_over',
-        'HC01_VC85': 'median_income',
+        'HC01_VC114': 'median_income',
         "GEO.id2":"state_geoid",
         "GEO.id":'geoid',
         "HC03_VC07":"pct_unemployment",
@@ -34,6 +34,15 @@ def fix_median_income(val):
         return None
     else:
         return float(val)
+
+def metroAreas():
+    dtypes = {'FIPS State Code':str, 'FIPS County Code':str}
+    csa_delineation = pd.read_csv("data/msa_delineations2015.csv", dtype=dtypes)
+    csa_incomes = pd.read_csv("data/csa/ACS_15_5YR_B19113.csv").rename(columns={'HD01_VD01':'msa_median_income'})
+    csa_complete_info = pd.merge(csa_delineation, csa_incomes, left_on='CSA Code', right_on='CSA',how='inner')
+    csa_complete_info['state_county'] = csa_complete_info['FIPS State Code'] + csa_complete_info['FIPS County Code']
+    csa_complete_info = csa_complete_info.set_index("state_county")
+    return csa_complete_info
 #%%
 def isCensusTractQualified():
     """
@@ -59,7 +68,7 @@ income for such tract does not exceed 80 percent of statewide median family inco
 """
     column_names = {
         'HC01_VC03':'population_16_and_over',
-        'HC01_VC85': 'median_income',
+        'HC01_VC114': 'median_income',
         "GEO.id2":"geoid2",
         "GEO.id":'geoid',
         "HC03_VC07":"pct_unemployment",
@@ -69,20 +78,33 @@ income for such tract does not exceed 80 percent of statewide median family inco
     tract_frame = tract_frame[['geoid','median_income','geoid2','pct_unemployment','pct_poverty']]
     tract_frame = tract_frame[tract_frame != '-']
     state_frame = statewide_median_incomes()
+    csa_frame = metroAreas()
     def get_state_geoid(geoid):
         """
         1400000US01001020100
         """
         return ''.join(('0',geoid[1:11]))
+    def get_csa_code(geoid2):
+        """
+        25017350103
+        """
+        test_geoid = str(geoid2)
+        return test_geoid[0:5]
     tract_frame['state_geoid'] = tract_frame.geoid.apply(get_state_geoid)
+    tract_frame['csa_code'] = tract_frame.geoid2.apply(get_csa_code)
+    tract_frame = tract_frame.join(csa_frame['msa_median_income'], on='csa_code', how='left')
     tract_frame['poverty_above_20pct'] = tract_frame.pct_poverty.astype(float) > 20
     tract_frame = tract_frame.join(state_frame, on='state_geoid', rsuffix='_state')
     tract_frame['ratio_state_median_income'] = tract_frame.median_income.apply(fix_median_income)/tract_frame.median_income_state
-    tract_frame['median_income_less_than_80pct'] = tract_frame.ratio_state_median_income < .80
+    tract_frame['ratio_msa_median_income'] = tract_frame.median_income.apply(fix_median_income)/tract_frame.msa_median_income
+    tract_frame['state_median_income_less_than_80pct'] = tract_frame.ratio_state_median_income < .80
+    tract_frame['msa_median_income_less_than_80pct'] = tract_frame.ratio_msa_median_income < .80
     def tract_is_opp_zone(tract):
-        if tract.median_income_less_than_80pct:
+        if tract.poverty_above_20pct:
             return True
-        elif tract.poverty_above_20pct:
+        elif tract.msa_median_income_less_than_80pct and  not pd.isna(tract.msa_median_income): #Nones will be false
+            return True
+        elif tract.state_median_income_less_than_80pct and pd.isna(tract.msa_median_income):
             return True
         else:
             return False
@@ -93,3 +115,4 @@ def fix_geoid(geoid2):
     return ''.join(['1400000US', str(geoid2)])
 
 
+isCensusTractQualified()
