@@ -39,7 +39,7 @@ def extract_shape_files():
 
 ftp = ftp_login()
 filenames = get_filenames()
-filter_files = [f for f in filenames if '02' in f]
+filter_files = [f for f in filenames]
 with tempfile.TemporaryDirectory() as temp_directory:
     for ftp_file in filter_files:
         download_file(ftp_file)

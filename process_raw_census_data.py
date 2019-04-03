@@ -19,7 +19,7 @@ def statewide_median_incomes():
         "HC03_VC07":"pct_unemployment",
         "HC03_VC161": "pct_poverty"
     }
-    state_frame = pd.read_csv("data/states/ACS_17_5YR_DP03_with_ann.csv"
+    state_frame = pd.read_csv("data/states/ACS_15_5YR_DP03_with_ann.csv"
         ).rename(columns=column_names).set_index('geoid')
     state_frame = state_frame[state_frame.index.str.startswith("0400000US")]
     return state_frame[['population_16_and_over','median_income','pct_unemployment','pct_poverty']] #return only the actual states
@@ -30,6 +30,8 @@ def fix_median_income(val):
         return 250000
     elif val == '2,500-':
         return 2500
+    elif val == '(X)':
+        return None
     else:
         return float(val)
 #%%
@@ -63,7 +65,7 @@ income for such tract does not exceed 80 percent of statewide median family inco
         "HC03_VC07":"pct_unemployment",
         "HC03_VC161": "pct_poverty"
     }
-    tract_frame = pd.read_csv("data/tracts/ACS_17_5YR_DP03_with_ann.csv").rename(columns=column_names)
+    tract_frame = pd.read_csv("data/tracts/ACS_15_5YR_DP03_with_ann.csv").rename(columns=column_names)
     tract_frame = tract_frame[['geoid','median_income','geoid2','pct_unemployment','pct_poverty']]
     tract_frame = tract_frame[tract_frame != '-']
     state_frame = statewide_median_incomes()
