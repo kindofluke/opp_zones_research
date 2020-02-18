@@ -74,7 +74,7 @@ income for such tract does not exceed 80 percent of statewide median family inco
         "HC03_VC07":"pct_unemployment",
         "HC03_VC161": "pct_poverty"
     }
-    tract_frame = pd.read_csv("data/tracts/ACS_15_5YR_DP03_with_ann.csv").rename(columns=column_names)
+    tract_frame = pd.read_csv("data/tracts/ACS_15_5YR_DP03_with_ann.csv", dtype={'GEO.id':str,"GEO.id2":str}).rename(columns=column_names)
     tract_frame = tract_frame[['geoid','median_income','geoid2','pct_unemployment','pct_poverty']]
     tract_frame = tract_frame[tract_frame != '-']
     state_frame = statewide_median_incomes()
@@ -114,5 +114,3 @@ income for such tract does not exceed 80 percent of statewide median family inco
 def fix_geoid(geoid2):
     return ''.join(['1400000US', str(geoid2)])
 
-
-isCensusTractQualified()

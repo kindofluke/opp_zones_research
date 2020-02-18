@@ -8,6 +8,7 @@ __pycache__/
 # C extensions
 *.so
 data
+src
 
 # Distribution / packaging
 .Python
@@ -117,3 +118,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+dump.sql
+opp_zone_backup.tar.gz

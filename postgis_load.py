@@ -135,7 +135,7 @@ def bulk_insert_mappings_tractdata():
 
 def bulk_insert_mappings_qualified_zone_data():
     path_to_file = Path('data','QualifiedOppZonesDec2018.csv')
-    all_tracts = pd.read_csv(path_to_file)
+    all_tracts = pd.read_csv(path_to_file, dtype={'TractID':str})
     all_tracts = all_tracts.dropna() #no null values 
     session = Session(bind=engine)
     session.bulk_insert_mappings(
@@ -173,7 +173,7 @@ def bulk_insert_mappings_identified_tracts():
         ]
     )
     session.commit()
-
+6
 def load_all():
     init_db()
     bulk_insert_mappings_geo()
@@ -181,6 +181,6 @@ def load_all():
     bulk_insert_mappings_qualified_zone_data()
     bulk_insert_mappings_identified_tracts()
 
-init_db()
+
 bulk_insert_mappings_tractdata()
 
